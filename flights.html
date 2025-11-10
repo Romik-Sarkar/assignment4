@@ -54,13 +54,77 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="origin">Origin (TX or CA city): *</label>
-                            <input type="text" id="origin" name="origin" placeholder="e.g., Dallas, Austin">
+                            <select id="origin" name="origin">
+                                <option value="">-- Select Origin City --</option>
+                                <optgroup label="Texas Cities">
+                                    <option value="Dallas">Dallas</option>
+                                    <option value="Houston">Houston</option>
+                                    <option value="Austin">Austin</option>
+                                    <option value="San Antonio">San Antonio</option>
+                                    <option value="Fort Worth">Fort Worth</option>
+                                    <option value="El Paso">El Paso</option>
+                                    <option value="Arlington">Arlington</option>
+                                    <option value="Corpus Christi">Corpus Christi</option>
+                                    <option value="Plano">Plano</option>
+                                    <option value="Laredo">Laredo</option>
+                                    <option value="Lubbock">Lubbock</option>
+                                    <option value="Irving">Irving</option>
+                                </optgroup>
+                                <optgroup label="California Cities">
+                                    <option value="Los Angeles">Los Angeles</option>
+                                    <option value="San Diego">San Diego</option>
+                                    <option value="San Jose">San Jose</option>
+                                    <option value="San Francisco">San Francisco</option>
+                                    <option value="Fresno">Fresno</option>
+                                    <option value="Sacramento">Sacramento</option>
+                                    <option value="Long Beach">Long Beach</option>
+                                    <option value="Oakland">Oakland</option>
+                                    <option value="Bakersfield">Bakersfield</option>
+                                    <option value="Anaheim">Anaheim</option>
+                                    <option value="Santa Ana">Santa Ana</option>
+                                    <option value="Riverside">Riverside</option>
+                                    <option value="Stockton">Stockton</option>
+                                    <option value="Irvine">Irvine</option>
+                                </optgroup>
+                            </select>
                             <span class="error" id="originError"></span>
                         </div>
 
                         <div class="form-group">
                             <label for="destination">Destination (TX or CA city): *</label>
-                            <input type="text" id="destination" name="destination" placeholder="e.g., Los Angeles, Houston">
+                            <select id="destination" name="destination">
+                                <option value="">-- Select Destination City --</option>
+                                <optgroup label="Texas Cities">
+                                    <option value="Dallas">Dallas</option>
+                                    <option value="Houston">Houston</option>
+                                    <option value="Austin">Austin</option>
+                                    <option value="San Antonio">San Antonio</option>
+                                    <option value="Fort Worth">Fort Worth</option>
+                                    <option value="El Paso">El Paso</option>
+                                    <option value="Arlington">Arlington</option>
+                                    <option value="Corpus Christi">Corpus Christi</option>
+                                    <option value="Plano">Plano</option>
+                                    <option value="Laredo">Laredo</option>
+                                    <option value="Lubbock">Lubbock</option>
+                                    <option value="Irving">Irving</option>
+                                </optgroup>
+                                <optgroup label="California Cities">
+                                    <option value="Los Angeles">Los Angeles</option>
+                                    <option value="San Diego">San Diego</option>
+                                    <option value="San Jose">San Jose</option>
+                                    <option value="San Francisco">San Francisco</option>
+                                    <option value="Fresno">Fresno</option>
+                                    <option value="Sacramento">Sacramento</option>
+                                    <option value="Long Beach">Long Beach</option>
+                                    <option value="Oakland">Oakland</option>
+                                    <option value="Bakersfield">Bakersfield</option>
+                                    <option value="Anaheim">Anaheim</option>
+                                    <option value="Santa Ana">Santa Ana</option>
+                                    <option value="Riverside">Riverside</option>
+                                    <option value="Stockton">Stockton</option>
+                                    <option value="Irvine">Irvine</option>
+                                </optgroup>
+                            </select>
                             <span class="error" id="destinationError"></span>
                         </div>
                     </div>
@@ -163,17 +227,6 @@
         // Load flights data when page loads
         loadFlightsData();
 
-        // Texas and California cities
-        const validCities = [
-            'dallas', 'houston', 'austin', 'san antonio', 'fort worth', 'el paso',
-            'arlington', 'corpus christi', 'plano', 'laredo', 'lubbock', 'irving',
-            'los angeles', 'san diego', 'san jose', 'san francisco', 'fresno',
-            'sacramento', 'long beach', 'oakland', 'bakersfield', 'anaheim',
-            'santa ana', 'riverside', 'stockton', 'irvine'
-        ];
-
-        const cityPattern = new RegExp(`^(${validCities.join('|')})$`, 'i');
-
         // Display current date and time
         function updateDateTime() {
             const now = new Date();
@@ -254,19 +307,16 @@
 
             // Validate origin
             if (!origin) {
-                showError('originError', 'Origin is required');
-                isValid = false;
-            } else if (!cityPattern.test(origin.toLowerCase())) {
-                showError('originError', 'Origin must be a city in Texas or California');
+                showError('originError', 'Please select an origin city');
                 isValid = false;
             }
 
             // Validate destination
             if (!destination) {
-                showError('destinationError', 'Destination is required');
+                showError('destinationError', 'Please select a destination city');
                 isValid = false;
-            } else if (!cityPattern.test(destination.toLowerCase())) {
-                showError('destinationError', 'Destination must be a city in Texas or California');
+            } else if (origin && destination.toLowerCase() === origin.toLowerCase()) {
+                showError('destinationError', 'Destination must be different from origin');
                 isValid = false;
             }
 
