@@ -67,25 +67,37 @@
         // Load cars data from XML file
         async function loadCarsData() {
             try {
-                const response = await fetch('cars.xml');
-                if (!response.ok) {
-                    throw new Error('Failed to load cars data');
+                const storedData = localStorage.getItem('carsData');
+
+                if (storedData) {
+                    carsData = JSON.parse(storedData);
+                    console.log('Cars loaded from localStorage:', carsData.cars.length);
+                } else {
+                    console.log('Loading from cars.xml...');
+                    const response = await fetch('cars.xml');
+                    const xmlText = await response.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    
+                    const cars = [];
+                    const carNodes = xmlDoc.getElementsByTagName('car');
+                    
+                    for (let car of carNodes) {
+                        cars.push({
+                            carId: car.getElementsByTagName('car-id')[0]?.textContent,
+                            city: car.getElementsByTagName('city')[0]?.textContent,
+                            type: car.getElementsByTagName('type')[0]?.textContent,
+                            checkInDate: car.getElementsByTagName('check-in-date')[0]?.textContent,
+                            checkOutDate: car.getElementsByTagName('check-out-date')[0]?.textContent,
+                            pricePerDay: parseFloat(car.getElementsByTagName('price-per-day')[0]?.textContent),
+                            available: true
+                        });
+                    }
+                    
+                    carsData = { cars: cars };
+                    localStorage.setItem('carsData', JSON.stringify(carsData));
+                    console.log('Cars loaded from XML:', cars.length);
                 }
-                const xmlText = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-                const cars = xmlDoc.querySelectorAll('car');
-                carsData = Array.from(cars).map(car => ({
-                    carId: car.querySelector('car-id').textContent,
-                    city: car.querySelector('city').textContent,
-                    type: car.querySelector('type').textContent,
-                    checkInDate: car.querySelector('check-in-date').textContent,
-                    checkOutDate: car.querySelector('check-out-date').textContent,
-                    pricePerDay: parseFloat(car.querySelector('price-per-day').textContent)
-                }));
-
-                console.log('Cars data loaded:', carsData.length, 'cars');
             } catch (error) {
                 console.error('Error loading cars data:', error);
                 alert('Error: Could not load cars data. Please make sure cars.xml exists in the same directory.');
@@ -357,11 +369,33 @@
             }
 
             // Search for cars matching criteria
-            const availableCars = carsData.filter(car =>
-                car.city.toLowerCase() === city.toLowerCase() &&
-                car.type.toLowerCase() === carType.toLowerCase() &&
-                isDateInRange(checkIn, checkOut, car.checkInDate, car.checkOutDate)
-            );
+            const availableCars = carsData.cars.filter(car => {
+                // Check basic criteria
+                if (car.city.toLowerCase() !== city.toLowerCase()) return false;
+                if (car.type.toLowerCase() !== carType.toLowerCase()) return false;
+                if (!isDateInRange(checkIn, checkOut, car.checkInDate, car.checkOutDate)) return false;
+                
+                // Check if car is marked as unavailable
+                if (car.available === false) {
+                    // Check if booked dates overlap with requested dates
+                    if (car.bookedDates) {
+                        const reqStart = new Date(checkIn);
+                        const reqEnd = new Date(checkOut);
+                        const bookedStart = new Date(car.bookedDates.from);
+                        const bookedEnd = new Date(car.bookedDates.to);
+                        
+                        // If dates overlap, car is not available
+                        if (reqStart <= bookedEnd && reqEnd >= bookedStart) {
+                            return false;
+                        }
+                    } else {
+                        // If marked unavailable but no specific dates, exclude it
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
 
             // Get personalized recommendations based on user history
             const userPreferences = getUserPreferences();
@@ -381,7 +415,7 @@
             if (recommendedCars.length > 0) {
                 html += `
                     <div style="background: linear-gradient(135deg, #fff3cd, #ffeaa7); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid #f39c12;">
-                        <h3 style="color: #d35400; margin-bottom: 15px;">⭐ Personalized Recommendations</h3>
+                        <h3 style="color: #d35400; margin-bottom: 15px;">Personalized Recommendations</h3>
                         <p style="color: #6c5ce7; margin-bottom: 15px;">Based on your previous bookings, we recommend these options:</p>
                 `;
 

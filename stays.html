@@ -123,25 +123,36 @@
         // Load hotels data from XML file
         async function loadHotelsData() {
             try {
-                const response = await fetch('hotels.xml');
-                if (!response.ok) {
-                    throw new Error('Failed to load hotels data');
+                const storedData = localStorage.getItem('hotelsData');
+                
+                if (storedData) {
+                    hotelsData = JSON.parse(storedData);
+                    console.log('Hotels loaded from localStorage:', hotelsData.hotels.length);
+                } else {
+                    console.log('Loading from hotels.xml...');
+                    const response = await fetch('hotels.xml');
+                    const xmlText = await response.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    
+                    const hotels = [];
+                    const hotelNodes = xmlDoc.getElementsByTagName('hotel');
+                    
+                    for (let hotel of hotelNodes) {
+                        hotels.push({
+                            hotelId: hotel.getElementsByTagName('hotel-id')[0]?.textContent,
+                            hotelName: hotel.getElementsByTagName('hotel-name')[0]?.textContent,
+                            city: hotel.getElementsByTagName('city')[0]?.textContent,
+                            availableRooms: parseInt(hotel.getElementsByTagName('available-rooms')[0]?.textContent),
+                            date: hotel.getElementsByTagName('date')[0]?.textContent,
+                            pricePerNight: parseFloat(hotel.getElementsByTagName('price-per-night')[0]?.textContent)
+                        });
+                    }
+                    
+                    hotelsData = { hotels: hotels };
+                    localStorage.setItem('hotelsData', JSON.stringify(hotelsData));
+                    console.log('Hotels loaded from XML:', hotels.length);
                 }
-                const xmlText = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-                const hotels = xmlDoc.querySelectorAll('hotel');
-                hotelsData = Array.from(hotels).map(hotel => ({
-                    hotelId: hotel.querySelector('hotel-id').textContent,
-                    hotelName: hotel.querySelector('hotel-name').textContent,
-                    city: hotel.querySelector('city').textContent,
-                    availableRooms: parseInt(hotel.querySelector('available-rooms').textContent),
-                    date: hotel.querySelector('date').textContent,
-                    pricePerNight: parseFloat(hotel.querySelector('price-per-night').textContent)
-                }));
-
-                console.log('Hotels data loaded:', hotelsData.length, 'hotels');
             } catch (error) {
                 console.error('Error loading hotels data:', error);
                 alert('Error: Could not load hotels data. Please make sure hotels.xml exists in the same directory.');
@@ -264,7 +275,7 @@
             const roomsNeeded = Math.ceil(adultsAndChildren / 2);
 
             // Search for hotels in the city
-            const availableHotels = hotelsData.filter(hotel =>
+            const availableHotels = hotelsData.hotels.filter(hotel =>
                 hotel.city.toLowerCase() === city.toLowerCase() &&
                 hotel.availableRooms >= roomsNeeded
             );
