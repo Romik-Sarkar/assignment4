@@ -137,7 +137,7 @@
             const form = document.createElement('form');
             form.id = 'carForm';
             
-            // City input
+// City input with datalist
             const cityGroup = document.createElement('div');
             cityGroup.className = 'form-group';
             
@@ -145,18 +145,36 @@
             cityLabel.setAttribute('for', 'city');
             cityLabel.textContent = 'City: *';
             
+            // Create <input> element
             const cityInput = document.createElement('input');
             cityInput.type = 'text';
             cityInput.id = 'city';
             cityInput.name = 'city';
-            cityInput.placeholder = 'Enter city name';
+            cityInput.placeholder = 'Type city name...';
+            cityInput.setAttribute('list', 'carCityList'); // Link to datalist
+            
+            // Create <datalist> element
+            const cityDataList = document.createElement('datalist');
+            cityDataList.id = 'carCityList';
+
+            // Get unique cities (removed empty string)
+            const cities = ['Dallas', 'Los Angeles', 'Houston', 'San Francisco', 'Austin', 
+                           'San Diego', 'San Antonio', 'Sacramento', 'El Paso', 'Fort Worth', 
+                           'San Jose', 'Oakland', 'Fresno'];
+            
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city; // Value is the city name itself
+                cityDataList.appendChild(option);
+            });
             
             const cityError = document.createElement('span');
             cityError.className = 'error';
             cityError.id = 'cityError';
             
             cityGroup.appendChild(cityLabel);
-            cityGroup.appendChild(cityInput);
+            cityGroup.appendChild(cityInput);     // Append the <input>
+            cityGroup.appendChild(cityDataList);  // Append the <datalist>
             cityGroup.appendChild(cityError);
             
             // Car type select
@@ -474,6 +492,6 @@
         // Build the form when page loads
         buildCarForm();
     </script>
-    <script src="/add2cart.js"></script>
+    <script src="add2cart.js"></script>
 </body>
 </html>
