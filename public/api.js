@@ -5,9 +5,7 @@ const API_URL = 'http://localhost:3000/api';
 // Cart storage key
 const CART_KEY = 'travelDealsCart';
 
-// ============================================
 // USER AUTHENTICATION API
-// ============================================
 
 async function registerUser(userData) {
     try {
@@ -81,9 +79,8 @@ function requireLogin() {
     return true;
 }
 
-// ============================================
 // CONTACTS API
-// ============================================
+
 
 async function saveContact(contactData) {
     try {
@@ -120,9 +117,9 @@ async function getAllContacts() {
     }
 }
 
-// ============================================
+
 // BOOKINGS API
-// ============================================
+
 
 async function saveBooking(bookingData) {
     try {
@@ -159,9 +156,9 @@ async function getAllBookings() {
     }
 }
 
-// ============================================
+
 // FLIGHTS API
-// ============================================
+
 
 async function loadFlights() {
     try {
@@ -193,9 +190,9 @@ async function loadFlights() {
     }
 }
 
-// ============================================
+
 // HOTELS API
-// ============================================
+
 
 async function loadHotels() {
     try {
@@ -223,9 +220,9 @@ async function loadHotels() {
     }
 }
 
-// ============================================
+
 // CARS API
-// ============================================
+
 
 async function loadCars() {
     try {
@@ -253,9 +250,9 @@ async function loadCars() {
     }
 }
 
-// ============================================
+
 // CART API - Uses sessionStorage
-// ============================================
+
 
 function getCart() {
     try {
@@ -293,9 +290,7 @@ function removeFromCart(index) {
     saveCartToStorage(cart);
 }
 
-// ============================================
 // CONNECTION TEST
-// ============================================
 
 async function testConnection() {
     try {
