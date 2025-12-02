@@ -7,7 +7,7 @@
     <check-in-date>2024-09-01</check-in-date>
     <check-out-date>2024-12-01</check-out-date>
     <price-per-day>45.00</price-per-day>
-  </car>
+  <available>false</available></car>
   <car>
     <car-id>C002</car-id>
     <city>Dallas</city>

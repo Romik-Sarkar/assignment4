@@ -171,5 +171,64 @@
     "pickUpDate": "2024-09-01",
     "dropOffDate": "2024-09-05",
     "pricePerDay": 75
+  },
+  {
+    "bookingId": "BK176455662732014",
+    "bookingNumber": "BKN-1764556627320",
+    "userId": "USER9251",
+    "bookingDate": "2025-12-01T02:37:07.320Z",
+    "status": "confirmed",
+    "type": "flight",
+    "tripType": "oneway",
+    "flightId": "FL001",
+    "origin": "Dallas",
+    "destination": "Los Angeles",
+    "departDate": "2024-09-01",
+    "departureTime": "06:00",
+    "arrivalTime": "08:30",
+    "adults": 1,
+    "children": 0,
+    "infants": 0,
+    "price": 299.99,
+    "passengers": [
+      {
+        "firstName": "Bob",
+        "lastName": "Marley",
+        "dateOfBirth": "2002-01-20",
+        "ssn": "111-11-1111"
+      }
+    ]
+  },
+  {
+    "bookingId": "BK1764556696314261",
+    "bookingNumber": "BKN-1764556696314",
+    "userId": "USER7111",
+    "bookingDate": "2025-12-01T02:38:16.314Z",
+    "status": "confirmed",
+    "type": "hotel",
+    "hotelId": "H013",
+    "hotelName": "Corpus Christi Beachfront",
+    "city": "Corpus Christi",
+    "checkIn": "2024-09-01",
+    "checkOut": "2024-09-02",
+    "adults": 1,
+    "children": 0,
+    "infants": 0,
+    "rooms": 1,
+    "pricePerNight": 140
+  },
+  {
+    "bookingId": "BK1764556795757781",
+    "bookingNumber": "BKN-1764556795757",
+    "userId": "USER2714",
+    "bookingDate": "2025-12-01T02:39:55.757Z",
+    "status": "confirmed",
+    "type": "car",
+    "carId": "C001",
+    "city": "Dallas",
+    "carType": "Economy",
+    "pickUpDate": "2024-09-12",
+    "dropOffDate": "2024-09-20",
+    "pricePerDay": 45
   }
 ]

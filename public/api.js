@@ -1,12 +1,90 @@
-// Frontend API Helper
-// Cart data persists in sessionStorage (cleared when browser tab closes)
+// Frontend API Helper 
 
 const API_URL = 'http://localhost:3000/api';
 
 // Cart storage key
 const CART_KEY = 'travelDealsCart';
 
+// ============================================
+// USER AUTHENTICATION API
+// ============================================
+
+async function registerUser(userData) {
+    try {
+        const response = await fetch(`${API_URL}/users/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            console.log('✓ User registered:', result.user.phone);
+            return result;
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Error registering user:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function loginUser(phone, password) {
+    try {
+        const response = await fetch(`${API_URL}/users/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phone, password })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            console.log('✓ User logged in:', result.user.phone);
+            // Store user in session
+            sessionStorage.setItem('currentUser', JSON.stringify(result.user));
+            return result;
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Error logging in:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+function logoutUser() {
+    sessionStorage.removeItem('currentUser');
+    console.log('✓ User logged out');
+    window.location.href = '/';
+}
+
+function getCurrentUser() {
+    const userStr = sessionStorage.getItem('currentUser');
+    return userStr ? JSON.parse(userStr) : null;
+}
+
+function isLoggedIn() {
+    return getCurrentUser() !== null;
+}
+
+function requireLogin() {
+    if (!isLoggedIn()) {
+        alert('Please login to access this page');
+        window.location.href = '/login';
+        return false;
+    }
+    return true;
+}
+
+// ============================================
 // CONTACTS API
+// ============================================
+
 async function saveContact(contactData) {
     try {
         const response = await fetch(`${API_URL}/contacts`, {
@@ -19,7 +97,7 @@ async function saveContact(contactData) {
         
         const result = await response.json();
         if (result.success) {
-            console.log('✓ Contact saved:', result.contact.contactId);
+            console.log('✓ Contact saved:', result.contactId);
             return result;
         } else {
             throw new Error(result.error);
@@ -42,7 +120,10 @@ async function getAllContacts() {
     }
 }
 
+// ============================================
 // BOOKINGS API
+// ============================================
+
 async function saveBooking(bookingData) {
     try {
         const response = await fetch(`${API_URL}/bookings`, {
@@ -78,7 +159,10 @@ async function getAllBookings() {
     }
 }
 
+// ============================================
 // FLIGHTS API
+// ============================================
+
 async function loadFlights() {
     try {
         console.log('Loading flights from:', `${API_URL}/flights`);
@@ -109,7 +193,10 @@ async function loadFlights() {
     }
 }
 
+// ============================================
 // HOTELS API
+// ============================================
+
 async function loadHotels() {
     try {
         console.log('Loading hotels from:', `${API_URL}/hotels`);
@@ -136,7 +223,10 @@ async function loadHotels() {
     }
 }
 
+// ============================================
 // CARS API
+// ============================================
+
 async function loadCars() {
     try {
         console.log('Loading cars from:', `${API_URL}/cars`);
@@ -163,8 +253,10 @@ async function loadCars() {
     }
 }
 
-// CART API - Uses sessionStorage for persistence across page navigation
-// Cart is cleared when browser tab closes
+// ============================================
+// CART API - Uses sessionStorage
+// ============================================
+
 function getCart() {
     try {
         const cartData = sessionStorage.getItem(CART_KEY);
@@ -201,7 +293,10 @@ function removeFromCart(index) {
     saveCartToStorage(cart);
 }
 
-// Connection test
+// ============================================
+// CONNECTION TEST
+// ============================================
+
 async function testConnection() {
     try {
         console.log('Testing connection to backend...');

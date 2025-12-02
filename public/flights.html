@@ -8,22 +8,8 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Travel Deals</h1>
-            <div id="datetime"></div>
-        </header>
 
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/stays">Stays</a></li>
-                <li><a href="/flights">Flights</a></li>
-                <li><a href="/cars">Cars</a></li>
-                <li><a href="/cruises">Cruises</a></li>
-                <li><a href="/contact">Contact Us</a></li>
-                <li><a href="/cart">Cart</a></li>
-            </ul>
-        </nav>
+        <div id="nav-placeholder"></div>
 
         <div class="content-wrapper">
             <aside class="sidebar">
@@ -153,6 +139,7 @@
     </div>
     
     <script src="api.js"></script>
+    <script src="navLoader.js"></script>
     <script>
         // In-memory storage for flights data (replacing localStorage)
         let flightsData = { flights: [] };

@@ -1,4 +1,3 @@
-
 // Travel Deals Backend Server 
 const express = require('express');
 const fs = require('fs').promises;
@@ -14,7 +13,6 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files from public directory
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Data directory
@@ -85,7 +83,9 @@ async function writeXML(filename, xmlString) {
 }
 
 
-// PAGE ROUTES
+// ============================================
+// PAGE ROUTES - ADD THESE BEFORE API ROUTES
+// ============================================
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -115,9 +115,80 @@ app.get('/cart', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'cart.html'));
 });
 
+// ADD THESE NEW ROUTES FOR LOGIN AND REGISTER
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
+app.get('/account', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'account.html'));
+});
+
+
+// ============================================
 // API ENDPOINTS
+// ============================================
 
+// USERS API
+app.get('/api/users', async (req, res) => {
+    try {
+        const users = await readJSON('users.json') || [];
+        res.json({ success: true, users });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/api/users/register', async (req, res) => {
+    try {
+        const users = await readJSON('users.json') || [];
+        const { phone, password, firstName, lastName, dateOfBirth, email, gender } = req.body;
+        
+        // Prevent registration with admin phone number
+        if (phone === '222-222-2222') {
+            return res.json({ 
+                success: false, 
+                error: 'This phone number is reserved for system administrators' 
+            });
+        }
+        
+        // Check if phone already exists
+        if (users.some(u => u.phone === phone)) {
+            return res.json({ success: false, error: 'Phone number already registered' });
+        }
+        
+        const newUser = { phone, password, firstName, lastName, dateOfBirth, email, gender };
+        users.push(newUser);
+        await writeJSON('users.json', users);
+        
+        res.json({ success: true, user: newUser });
+    } catch (error) {
+        console.error('Error registering user:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/api/users/login', async (req, res) => {
+    try {
+        const users = await readJSON('users.json') || [];
+        const { phone, password } = req.body;
+        const user = users.find(u => u.phone === phone && u.password === password);
+        
+        if (user) {
+            res.json({ success: true, user });
+        } else {
+            res.json({ success: false, error: 'Invalid credentials' });
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 // CONTACTS API
 app.get('/api/contacts', async (req, res) => {
@@ -133,27 +204,29 @@ app.get('/api/contacts', async (req, res) => {
 
 app.post('/api/contacts', async (req, res) => {
     try {
-        const { firstName, lastName, phone, gender, email, comment } = req.body;
+        const { firstName, lastName, phone, gender, email, dateOfBirth, comment } = req.body;
         
-        let contacts = await readJSON('contacts.json') || [];
+        let xmlString = await readXML('contacts.xml') || '<?xml version="1.0"?><contacts></contacts>';
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
         
-        const newContact = {
-            contactId: 'CNT' + Date.now() + Math.floor(Math.random() * 1000),
-            firstName,
-            lastName,
-            phone,
-            gender,
-            email,
-            comment,
-            submittedAt: new Date().toISOString(),
-            status: 'new'
-        };
+        const contactId = 'CNT' + Date.now();
+        const contactNode = xmlDoc.createElement('contact');
         
-        contacts.push(newContact);
-        await writeJSON('contacts.json', contacts);
+        // Add child elements
+        const fields = { contactId, phone, firstName, lastName, dateOfBirth, gender, email, comment };
+        for (const [key, value] of Object.entries(fields)) {
+            const elem = xmlDoc.createElement(key);
+            elem.textContent = value;
+            contactNode.appendChild(elem);
+        }
         
-        console.log('✓ Contact saved:', newContact.contactId);
-        res.json({ success: true, contact: newContact });
+        xmlDoc.documentElement.appendChild(contactNode);
+        
+        const serializer = new XMLSerializer();
+        await writeXML('contacts.xml', serializer.serializeToString(xmlDoc));
+        
+        res.json({ success: true, contactId });
     } catch (error) {
         console.error('Error saving contact:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -405,7 +478,9 @@ async function updateSourceAvailability(booking) {
     }
 }
 
-// 404 handler
+// ============================================
+// 404 handler - MUST BE LAST
+// ============================================
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -415,11 +490,13 @@ async function startServer() {
     await ensureDataDirectory();
     
     app.listen(PORT, () => {
+        console.log('═══════════════════════════════════════');
         console.log('   Travel Deals Backend Server         ');
+        console.log('═══════════════════════════════════════');
         console.log(`✓ Server running on http://localhost:${PORT}`);
         console.log(`✓ Data directory: ${DATA_DIR}`);
         console.log(`✓ Public directory: ${path.join(__dirname, 'public')}`);
-        console.log('\n📍 Available routes:');
+        console.log('\n📄 Available routes:');
         console.log('  GET  /             → Home');
         console.log('  GET  /stays        → Stays page');
         console.log('  GET  /flights      → Flights page');
@@ -427,7 +504,13 @@ async function startServer() {
         console.log('  GET  /cruises      → Cruises page');
         console.log('  GET  /contact      → Contact page');
         console.log('  GET  /cart         → Cart page');
+        console.log('  GET  /login        → Login page');
+        console.log('  GET  /register     → Register page');
+        console.log('  GET  /account      → Account page');
         console.log('\n📡 API endpoints:');
+        console.log('  GET  /api/users');
+        console.log('  POST /api/users/register');
+        console.log('  POST /api/users/login');
         console.log('  GET  /api/contacts');
         console.log('  POST /api/contacts');
         console.log('  GET  /api/bookings');
@@ -435,7 +518,8 @@ async function startServer() {
         console.log('  GET  /api/flights');
         console.log('  GET  /api/hotels');
         console.log('  GET  /api/cars');
-        console.log('\n🌐 Open http://localhost:3000 in your browser\n');
+        console.log('\n🌐 Open http://localhost:3000 in your browser');
+        console.log('═══════════════════════════════════════\n');
     });
 }
 

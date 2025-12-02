@@ -1,0 +1,42 @@
+<header>
+    <h1>Travel Deals</h1>
+    <div id="datetime"></div>
+        <!-- User Greeting - only visible when logged in -->
+    <li id="userGreetingNav" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 8px 15px; border-radius: 5px; margin-left: auto;">
+        <span id="userGreetingText" style="color: white; font-weight: 500;"></span>
+    </li>
+    
+</header>
+
+<nav>
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/stays">Stays</a></li>
+        <li><a href="/flights">Flights</a></li>
+        <li><a href="/cars">Cars</a></li>
+        <li><a href="/cruises">Cruises</a></li>
+        <li><a href="/contact">Contact Us</a></li>
+        <li><a href="/cart">Cart</a></li>
+        
+
+        <!-- Account - only visible when logged in -->
+        <li id="accountNav" style="display: none;">
+            <a href="/account">My Account</a>
+        </li>
+        
+        <!-- Logout - only visible when logged in -->
+        <li id="logoutNav" style="display: none;">
+            <a href="#" onclick="logout(event)">Logout</a>
+        </li>
+        
+        <!-- Register - only visible when NOT logged in -->
+        <li id="registerNav">
+            <a href="/register">Register</a>
+        </li>
+        
+        <!-- Login - only visible when NOT logged in -->
+        <li id="loginNav">
+            <a href="/login">Login</a>
+        </li>
+    </ul>
+</nav>
