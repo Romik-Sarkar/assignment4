@@ -83,9 +83,9 @@ async function writeXML(filename, xmlString) {
 }
 
 
-// ============================================
+
 // PAGE ROUTES - ADD THESE BEFORE API ROUTES
-// ============================================
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
