@@ -479,6 +479,173 @@ async function updateSourceAvailability(booking) {
 }
 
 // ============================================
+// ADMIN ENDPOINTS - File Upload to Database
+// ============================================
+
+// Middleware to check if user is admin
+function isAdmin(req, res, next) {
+    const { phone } = req.body;
+    if (phone === '222-222-2222') {
+        next();
+    } else {
+        res.status(403).json({ 
+            success: false, 
+            error: 'Access denied. Admin privileges required.' 
+        });
+    }
+}
+
+// Load Flights JSON into database
+app.post('/api/admin/load-flights', isAdmin, async (req, res) => {
+    try {
+        const { phone, flightsData } = req.body;
+        
+        // Validate data structure
+        if (!flightsData || !flightsData.flights || !Array.isArray(flightsData.flights)) {
+            return res.json({ 
+                success: false, 
+                error: 'Invalid data structure. Expected { flights: [...] }' 
+            });
+        }
+        
+        // Validate each flight has required fields
+        const requiredFields = ['flightId', 'origin', 'destination', 'departureDate', 
+                               'arrivalDate', 'departureTime', 'arrivalTime', 
+                               'availableSeats', 'price'];
+        
+        for (const flight of flightsData.flights) {
+            for (const field of requiredFields) {
+                if (!(field in flight)) {
+                    return res.json({ 
+                        success: false, 
+                        error: `Missing required field: ${field} in flight ${flight.flightId || 'unknown'}` 
+                    });
+                }
+            }
+        }
+        
+        // Save to database
+        await writeJSON('flights.json', flightsData);
+        
+        console.log(`✓ Admin ${phone} loaded ${flightsData.flights.length} flights into database`);
+        
+        res.json({ 
+            success: true, 
+            message: `Successfully loaded ${flightsData.flights.length} flights`,
+            count: flightsData.flights.length
+        });
+        
+    } catch (error) {
+        console.error('Error loading flights:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Load Hotels XML into database
+app.post('/api/admin/load-hotels', isAdmin, async (req, res) => {
+    try {
+        const { phone, hotelsXML } = req.body;
+        
+        // Parse XML to validate structure
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(hotelsXML, 'text/xml');
+        
+        // Check for parsing errors
+        const parseError = xmlDoc.getElementsByTagName('parsererror');
+        if (parseError.length > 0) {
+            return res.json({ 
+                success: false, 
+                error: 'Invalid XML format' 
+            });
+        }
+        
+        // Validate XML structure
+        const hotelNodes = xmlDoc.getElementsByTagName('hotel');
+        if (hotelNodes.length === 0) {
+            return res.json({ 
+                success: false, 
+                error: 'No hotel elements found in XML' 
+            });
+        }
+        
+        // Validate each hotel has required fields
+        const requiredFields = ['hotel-id', 'hotel-name', 'city', 'price-per-night'];
+        let validHotels = 0;
+        
+        for (let i = 0; i < hotelNodes.length; i++) {
+            const hotel = hotelNodes[i];
+            for (const field of requiredFields) {
+                const element = hotel.getElementsByTagName(field)[0];
+                if (!element || !element.textContent) {
+                    return res.json({ 
+                        success: false, 
+                        error: `Missing required field: ${field} in hotel #${i + 1}` 
+                    });
+                }
+            }
+            validHotels++;
+        }
+        
+        // Save to database
+        await writeXML('hotels.xml', hotelsXML);
+        
+        console.log(`✓ Admin ${phone} loaded ${validHotels} hotels into database`);
+        
+        res.json({ 
+            success: true, 
+            message: `Successfully loaded ${validHotels} hotels`,
+            count: validHotels
+        });
+        
+    } catch (error) {
+        console.error('Error loading hotels:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get current database statistics (admin only)
+app.post('/api/admin/stats', isAdmin, async (req, res) => {
+    try {
+        const flights = await readJSON('flights.json') || { flights: [] };
+        const bookings = await readJSON('bookings.json') || [];
+        
+        // Parse hotels XML
+        const xmlString = await readXML('hotels.xml');
+        let hotelCount = 0;
+        if (xmlString) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+            hotelCount = xmlDoc.getElementsByTagName('hotel').length;
+        }
+        
+        const flightBookings = bookings.filter(b => b.type === 'flight').length;
+        const hotelBookings = bookings.filter(b => b.type === 'hotel').length;
+        const carBookings = bookings.filter(b => b.type === 'car').length;
+        const cruiseBookings = bookings.filter(b => b.type === 'cruise').length;
+        
+        res.json({
+            success: true,
+            stats: {
+                flights: flights.flights.length,
+                hotels: hotelCount,
+                bookings: {
+                    total: bookings.length,
+                    flights: flightBookings,
+                    hotels: hotelBookings,
+                    cars: carBookings,
+                    cruises: cruiseBookings
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error getting stats:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
+// ============================================
 // 404 handler - MUST BE LAST
 // ============================================
 app.use((req, res) => {
