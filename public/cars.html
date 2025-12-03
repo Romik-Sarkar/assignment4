@@ -69,9 +69,10 @@
             userBookings = bookings.filter(b => b.type === 'car');
         }
 
-        // Load data when page loads
-        loadCarsData();
-        loadUserBookings();
+        // Load data when page loads - DISABLED for PHP version
+        // Data is loaded by admin via PHP API
+        // loadCarsData();
+        // loadUserBookings();
 
         // Display current date and time
         function updateDateTime() {

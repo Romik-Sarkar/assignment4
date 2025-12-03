@@ -41,14 +41,7 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Travel Deals</h1>
-            <div id="datetime"></div>
-            <div id="userGreeting" style="display: none; color: #a8dadc; margin-top: 10px; font-size: 0.95em;">
-                Welcome, <span id="userNameDisplay"></span>!
-            </div>
-        </header>
-
+        <!-- Header and nav loaded from topNav.html -->
         <div id="nav-placeholder"></div>
 
         <div class="content-wrapper">
@@ -83,15 +76,9 @@
                         <h3>🔧 Admin Controls</h3>
                         
                         <div class="form-group">
-                            <label>Load Flights JSON File:</label>
-                            <input type="file" id="flightsFile" accept=".json">
-                            <button onclick="loadFlightsJSON()">Load Flights to Database</button>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Load Hotels XML File:</label>
-                            <input type="file" id="hotelsFile" accept=".xml">
-                            <button onclick="loadHotelsXML()">Load Hotels to Database</button>
+                            <label>Load Data into MySQL Database:</label>
+                            <button onclick="loadFlightsJSON()" style="margin-right: 10px;">Load Flights from JSON (62 flights)</button>
+                            <button onclick="loadHotelsXML()">Load Hotels from XML (25 hotels)</button>
                         </div>
 
                         <h4>Admin Queries</h4>
@@ -182,7 +169,7 @@
             document.getElementById('datetime').textContent = now.toLocaleDateString('en-US', options);
         }
         
-        updateDateTime();
+        //updateDateTime();
         setInterval(updateDateTime, 1000);
 
         // Settings
@@ -223,45 +210,52 @@
         // ADMIN FUNCTIONS - Load JSON/XML Files
         // ============================================
         
-        function loadFlightsJSON() {
-            const fileInput = document.getElementById('flightsFile');
-            const file = fileInput.files[0];
-            if (!file) {
-                alert('Please select a JSON file');
+        async function loadFlightsJSON() {
+            if (!confirm('Load flights from data/flights.json into MySQL database?')) {
                 return;
             }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const flightsData = JSON.parse(e.target.result);
-                    localStorage.setItem('flightsDatabase', JSON.stringify(flightsData));
-                    alert(`✓ Flights loaded successfully!\n${flightsData.flights?.length || 0} flights imported.`);
-                } catch (error) {
-                    alert('Error loading flights: ' + error.message);
+
+            try {
+                const response = await fetch('/api-router.php/admin-load-flights.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`✓ Flights loaded successfully!\nInserted: ${result.data.inserted}\nUpdated: ${result.data.updated}`);
+                } else {
+                    alert('Error: ' + result.error);
                 }
-            };
-            reader.readAsText(file);
+            } catch (error) {
+                alert('Error loading flights: ' + error.message);
+                console.error(error);
+            }
         }
 
-        function loadHotelsXML() {
-            const fileInput = document.getElementById('hotelsFile');
-            const file = fileInput.files[0];
-            if (!file) {
-                alert('Please select an XML file');
+        async function loadHotelsXML() {
+            if (!confirm('Load hotels from data/hotels.xml into MySQL database?')) {
                 return;
             }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    localStorage.setItem('hotelsDatabase', e.target.result);
-                    alert('✓ Hotels loaded successfully!');
-                } catch (error) {
-                    alert('Error loading hotels: ' + error.message);
+
+            try {
+                const response = await fetch('/api-router.php/admin-load-hotels.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`✓ Hotels loaded successfully!\nInserted: ${result.data.inserted}\nUpdated: ${result.data.updated}`);
+                } else {
+                    alert('Error: ' + result.error);
                 }
-            };
-            reader.readAsText(file);
+            } catch (error) {
+                alert('Error loading hotels: ' + error.message);
+                console.error(error);
+            }
         }
 
         // ============================================

@@ -1,6 +1,6 @@
 // Frontend API Helper
 
-const API_URL = '/api-router.php';
+const API_URL = '../php/api';
 
 // Cart storage key
 const CART_KEY = 'travelDealsCart';

@@ -4,8 +4,6 @@
     <hotel-id>H001</hotel-id>
     <hotel-name>Grand Plaza Hotel Dallas</hotel-name>
     <city>Dallas</city>
-    <available-rooms>48</available-rooms>
-    <date>2024-09-01</date>
     <price-per-night>150.00</price-per-night>
   </hotel>
   <hotel>

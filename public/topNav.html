@@ -10,33 +10,26 @@
 
 <nav>
     <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/stays">Stays</a></li>
-        <li><a href="/flights">Flights</a></li>
-        <li><a href="/cars">Cars</a></li>
-        <li><a href="/cruises">Cruises</a></li>
-        <li><a href="/contact">Contact Us</a></li>
-        <li><a href="/cart">Cart</a></li>
-        
+        <li><a href="index.html">Home</a></li>
+        <li><a href="stays.html">Stays</a></li>
+        <li><a href="flights.html">Flights</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="cart.html">Cart</a></li>
 
-        <!-- Account - only visible when logged in -->
+        <!-- Account/Logout - only visible when logged in -->
         <li id="accountNav" style="display: none;">
-            <a href="/account">My Account</a>
+            <a href="account.html">My Account</a>
         </li>
-        
-        <!-- Logout - only visible when logged in -->
         <li id="logoutNav" style="display: none;">
             <a href="#" onclick="logout(event)">Logout</a>
         </li>
-        
-        <!-- Register - only visible when NOT logged in -->
-        <li id="registerNav">
-            <a href="/register">Register</a>
-        </li>
-        
-        <!-- Login - only visible when NOT logged in -->
+
+        <!-- Login/Register - only visible when NOT logged in -->
         <li id="loginNav">
-            <a href="/login">Login</a>
+            <a href="login.html">Login</a>
+        </li>
+        <li id="registerNav">
+            <a href="register.html">Register</a>
         </li>
     </ul>
 </nav>
